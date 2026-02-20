@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { HashRouter, Routes, Route, Navigate } from 'react-router-dom'
 import Login from './pages/login'
 import Unauthorized from './pages/unauthorized'
 import AdminDashboard from './pages/admin'
@@ -21,7 +21,7 @@ function HomeRedirect() {
 
 export default function App() {
   return (
-    <BrowserRouter>
+    <HashRouter>
       <Routes>
         <Route path="/" element={<HomeRedirect />} />
 
@@ -34,6 +34,6 @@ export default function App() {
         {/* catch-all */}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
-    </BrowserRouter>
+    </HashRouter>
   )
 }
