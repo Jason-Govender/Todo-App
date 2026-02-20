@@ -1,5 +1,5 @@
 import { Flex, Layout } from 'antd';
-import type { CSSProperties } from 'react';
+import type { CSSProperties, ReactNode } from 'react';
 
 const { Header, Content } = Layout;
 const headerStyle: CSSProperties = {
@@ -24,15 +24,25 @@ const layoutStyle: CSSProperties = {
   height: '100vh',
 };
 
-const HomeLayout = ({children}: {children: React.ReactNode}) => (
+type RoleVariant = 'admin' | 'client'
+
+type AppLayoutProps = {
+  variant: RoleVariant
+  title?: string
+  children: ReactNode
+}
+
+const HomeLayout = ({ variant, title, children }: AppLayoutProps) => (
   <Flex gap="middle" wrap>
     <Layout style={layoutStyle}>
-      <Header style={headerStyle}>To Do</Header>
+      <Header style={headerStyle}>{title ?? (variant === 'admin' ? 'Admin Portal' : 'Client Portal')}</Header>
       <Content style={contentStyle}>
         {children}
       </Content>
     </Layout>
   </Flex>
 );
+
+
 
 export default HomeLayout;

@@ -1,65 +1,67 @@
-import { useEffect } from "react";
-import { Alert, Button, Form, List, Space, Spin, Typography } from "antd";
-import { ToDoProvider } from "../../providers/to-do-provider/index.tsx"; 
+import { useCallback, useEffect } from "react";
+import { Alert, Button, List, Space, Spin, Typography } from "antd";
+import { ToDoProvider } from "../../providers/to-do-provider/index.tsx";
 import type { IToDoItem } from "../../providers/to-do-provider/context.tsx";
 
 const { Title, Text } = Typography;
 
 export function TodoProviderTest() {
-  const state = ToDoProvider.useToDoState();
-  const actions = ToDoProvider.useToDoActions();
-  const todos = state.toDoItems ?? [];
-  const loading = state.isPending ?? false;
-  const error = state.isError ?? null;
+  const { toDoItems = [], isPending = false, isError = null } =
+    ToDoProvider.useToDoState();
+  const { getToDoItems } = ToDoProvider.useToDoActions();
+
+  const fetchTodos = useCallback(() => {
+    getToDoItems();
+  }, [getToDoItems]);
 
   useEffect(() => {
-    actions.getToDoItems?.();
-  }, [actions]);
+    fetchTodos();
+  }, [fetchTodos]);
 
-  const onFinish = () => {
-  actions.getToDoItems();
-};
+  const errorMessage =
+    typeof isError === "string" ? isError : isError ? "Check console / network tab" : null;
 
   return (
-    <Space orientation="vertical" style={{ width: "100%" }} size="large">
-      <Title level={3} style={{ margin: 0 }}>
-        Todo Provider Test
-      </Title>
+    <div style={{ maxWidth: 600, margin: "0 auto" }}>
+      <Space direction="vertical" size="large" style={{ width: "100%" }}>
+        <Space align="center" style={{ justifyContent: "space-between", width: "100%" }}>
+          <Title level={3} style={{ margin: 0 }}>
+            Todo List
+          </Title>
 
-      <Form layout="inline" onFinish={onFinish}>
-        <Form.Item>
-          <Button type="primary" htmlType="submit" loading={loading}>
+          <Button type="primary" onClick={fetchTodos} loading={isPending}>
             Fetch todos
           </Button>
-        </Form.Item>
-      </Form>
+        </Space>
 
-      {error ? (
-        <Alert
-          type="error"
-          showIcon
-          title="Failed to load todos"
-          description={typeof error === "string" ? error : "Check console / network tab"}
-        />
-      ) : null}
-
-      <Spin spinning={loading}>
-        <List style={{ maxHeight: 400, overflowY: "auto" }} bordered dataSource={Array.isArray(todos) ? todos : []}locale={{ emptyText: "No todos yet (or fetch didn’t run)" }}
-        renderItem={(todo: IToDoItem) => (
-            <List.Item>
-            <Space orientation="vertical" size={0}>
-                <Text strong>
-                {todo.todo ?? "(missing text)"}
-                </Text>
-                <Text type="secondary">
-                Completed: {String(todo.completed ?? false)}
-                </Text>
-            </Space>
-            </List.Item>
+        {errorMessage && (
+          <Alert
+            type="error"
+            showIcon
+            message="Failed to load todos"
+            description={errorMessage}
+          />
         )}
-        />
 
-      </Spin>
-    </Space>
+        <Spin spinning={isPending}>
+          <List
+            bordered
+            style={{ maxHeight: 400, overflowY: "auto" }}
+            dataSource={toDoItems}
+            locale={{ emptyText: "No todos yet" }}
+            renderItem={(todo: IToDoItem) => (
+              <List.Item>
+                <Space direction="vertical" size={0}>
+                  <Text strong>{todo.todo || "(missing text)"}</Text>
+                  <Text type="secondary">
+                    Completed: {todo.completed ? "Yes" : "No"}
+                  </Text>
+                </Space>
+              </List.Item>
+            )}
+          />
+        </Spin>
+      </Space>
+    </div>
   );
 }
